@@ -20,17 +20,59 @@ setTimeout(() => document.querySelectorAll('.nav a').forEach(link => { if (link.
 const revealTargets = document.querySelectorAll('.section, .craft, .experience, .guest-notes, .club, .cta-band, .journal-card, .gift-panel');
 if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) { const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }), { threshold: .12 }); revealTargets.forEach(target => { target.classList.add('reveal'); observer.observe(target); }); }
 const navToggle = document.querySelector('.nav-toggle'); const nav = document.querySelector('.nav');
-if (navToggle && nav) { if (!nav.querySelector('[href="experiences.html"]')) nav.insertAdjacentHTML('beforeend', '<a href="experiences.html">Experiences</a><a href="journal.html">Journal</a><a href="gifts.html">Gifts</a>'); navToggle.addEventListener('click', () => { const open = nav.classList.toggle('open'); navToggle.setAttribute('aria-expanded', String(open)); navToggle.textContent = open ? 'Close' : 'Menu'; }); nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { nav.classList.remove('open'); navToggle.setAttribute('aria-expanded', 'false'); navToggle.textContent = 'Menu'; })); }
+if (navToggle && nav) { if (!nav.querySelector('[href="experiences.html"]')) nav.insertAdjacentHTML('beforeend', '<a href="experiences.html">Experiences</a><a href="journal.html">Journal</a><a href="gifts.html">Gifts</a><a href="login.html">Account</a>'); else if (!nav.querySelector('[href="login.html"]')) nav.insertAdjacentHTML('beforeend', '<a href="login.html">Account</a>'); navToggle.addEventListener('click', () => { const open = nav.classList.toggle('open'); navToggle.setAttribute('aria-expanded', String(open)); navToggle.textContent = open ? 'Close' : 'Menu'; }); nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { nav.classList.remove('open'); navToggle.setAttribute('aria-expanded', 'false'); navToggle.textContent = 'Menu'; })); }
 const toast = document.querySelector('#toast'); let timer; const notify = message => { if (!toast) return; toast.textContent = message; toast.classList.add('show'); clearTimeout(timer); timer = setTimeout(() => toast.classList.remove('show'), 2600); };
-const cart = new Map(); const count = document.querySelector('#cartCount'); const prices = {'Velvet Hot Chocolate':120,'Garden Strawberry Tart':150,'Dark Chocolate Cookie':100};
+const savedCart = localStorage.getItem('c053-cart');
+const cart = new Map(savedCart ? JSON.parse(savedCart) : []);
+window.saveCart = () => {
+    localStorage.setItem('c053-cart', JSON.stringify([...cart]));
+    const token = localStorage.getItem('co2_token');
+    if (token) {
+        fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ cart: Object.fromEntries(cart) })
+        }).catch(err => console.error(err));
+    }
+};
+window.syncCartFromBackend = async () => {
+    const token = localStorage.getItem('co2_token');
+    if (!token) return;
+    try {
+        const res = await fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.cart && Object.keys(data.cart).length > 0) {
+                cart.clear();
+                Object.entries(data.cart).forEach(([k, v]) => cart.set(k, v));
+                localStorage.setItem('c053-cart', JSON.stringify([...cart]));
+                if (typeof renderCart === 'function') renderCart();
+            }
+        }
+    } catch (e) { console.error(e); }
+};
+syncCartFromBackend();
+const count = document.querySelector('#cartCount'); const prices = {'Velvet Hot Chocolate':120,'Garden Strawberry Tart':150,'Dark Chocolate Cookie':100};
 document.body.insertAdjacentHTML('beforeend', '<div class="desk-backdrop"></div><aside class="order-desk" aria-label="Your order"><div class="desk-head"><div><p class="kicker">CLICK & COLLECT</p><h2>Your order</h2></div><button class="desk-close" type="button">Close</button></div><div class="desk-items"><p class="desk-empty">Your order is waiting for something delicious.</p></div><div class="collection"><label for="collectionTime">Collection time</label><select id="collectionTime"><option>As soon as possible · 15 min</option><option>In 30 minutes</option><option>In 45 minutes</option><option>In 1 hour</option></select></div><div class="desk-total"><span>Total</span><strong>£0.00</strong></div><button class="button dark desk-checkout" type="button">Continue to secure checkout</button><p class="checkout-note">A secure payment flow can be connected here.</p></aside>');
 const desk = document.querySelector('.order-desk'), backdrop = document.querySelector('.desk-backdrop'), deskItems = document.querySelector('.desk-items'), deskTotal = document.querySelector('.desk-total strong');
 const openDesk = () => { desk.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow = 'hidden'; };
 const closeDesk = () => { desk.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow = ''; };
 document.querySelectorAll('.order-button,[data-order]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); openDesk(); })); document.querySelector('.desk-close').addEventListener('click', closeDesk); backdrop.addEventListener('click', closeDesk);
-function renderCart(){ let quantity=0,total=0; deskItems.replaceChildren(); if(!cart.size){deskItems.innerHTML='<p class="desk-empty">Your order is waiting for something delicious.</p>';} cart.forEach((item,name)=>{quantity+=item.quantity;total+=item.price*item.quantity;const row=document.createElement('article');row.className='desk-item';row.innerHTML=`<strong>${name}</strong><span>${item.quantity} × ${formatINR(item.price)}</span><button type="button" aria-label="Remove ${name}">Remove</button>`;row.querySelector('button').addEventListener('click',()=>{cart.delete(name);renderCart();});deskItems.append(row);}); if(count) count.textContent=quantity; deskTotal.textContent=formatINR(total); }
+function renderCart(){ let quantity=0,total=0; deskItems.replaceChildren(); if(!cart.size){deskItems.innerHTML='<p class="desk-empty">Your order is waiting for something delicious.</p>';} cart.forEach((item,name)=>{quantity+=item.quantity;total+=item.price*item.quantity;const row=document.createElement('article');row.className='desk-item';row.innerHTML=`<strong>${name}</strong><span>${item.quantity} × ${formatINR(item.price)}</span><button type="button" aria-label="Remove ${name}">Remove</button>`;row.querySelector('button').addEventListener('click',()=>{cart.delete(name);renderCart();});deskItems.append(row);}); if(count) count.textContent=quantity; deskTotal.textContent=formatINR(total); saveCart(); }
+renderCart();
 document.querySelectorAll('[data-add]').forEach(button => button.addEventListener('click', () => { const name=button.dataset.add, product=cart.get(name)||{price:Number(button.dataset.price)||prices[name]||0,quantity:0}; product.quantity+=1;cart.set(name,product);renderCart();notify(`${name} added to your order.`); }));
-document.querySelector('.desk-checkout').addEventListener('click',()=>{if(!cart.size){notify('Please add something to your order first.');return;} notify('Checkout is ready for secure payment integration.');});
+document.querySelector('.desk-checkout').addEventListener('click', async () => {
+    if(!cart.size) { notify('Please add something to your order first.'); return; }
+    const token = localStorage.getItem('co2_token');
+    if (!token) { notify('Please log in to proceed to checkout.'); setTimeout(() => location.href='login.html', 2000); return; }
+    try {
+        const res = await fetch('/api/checkout', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (res.ok) {
+            cart.clear(); renderCart(); closeDesk(); notify(data.message);
+        } else { notify(data.message || 'Checkout failed'); }
+    } catch(e) { notify('Error during checkout.'); }
+});
 let selectedGift = Number(document.querySelector('[data-gift].selected')?.dataset.gift || 500); document.querySelectorAll('[data-gift]').forEach(button => button.addEventListener('click', () => { selectedGift = Number(button.dataset.gift); document.querySelectorAll('[data-gift]').forEach(item => item.classList.toggle('selected', item === button)); })); document.querySelector('#giftForm')?.addEventListener('submit', event => { event.preventDefault(); const name = `Digital Gift Card · ${formatINR(selectedGift)}`; const product = cart.get(name) || {price:selectedGift,quantity:0}; product.quantity += 1; cart.set(name, product); renderCart(); event.currentTarget.reset(); openDesk(); notify('Gift card added to your order.'); });
 document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => { document.querySelectorAll('[data-filter]').forEach(item => item.classList.toggle('selected', item === button)); const filter = button.dataset.filter; document.querySelectorAll('.products article').forEach(card => card.hidden = filter !== 'all' && card.dataset.category !== filter); }));
 document.querySelector('#enquiryForm')?.addEventListener('submit', event => { event.preventDefault(); event.currentTarget.reset(); notify('Thank you. We will be in touch shortly.'); });

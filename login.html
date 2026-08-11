@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Account | C053 Cafe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: var(--surface-light);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .dark-mode .auth-container {
+            background: var(--surface-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .auth-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .dark-mode .auth-tabs {
+            border-bottom-color: var(--border-dark);
+        }
+        .auth-tab {
+            background: none;
+            border: none;
+            font: inherit;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .auth-tab.active {
+            opacity: 1;
+            border-bottom: 2px solid var(--text-light);
+        }
+        .dark-mode .auth-tab.active {
+            border-bottom-color: var(--text-dark);
+        }
+        .auth-form {
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .auth-form.active {
+            display: flex;
+        }
+        .auth-form label {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .auth-form input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            font: inherit;
+            background: var(--bg-light);
+            color: var(--text-light);
+        }
+        .dark-mode .auth-form input {
+            border-color: var(--border-dark);
+            background: var(--bg-dark);
+            color: var(--text-dark);
+        }
+        .auth-form button {
+            margin-top: 1rem;
+            width: 100%;
+        }
+        #authMessage {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #d32f2f;
+        }
+        .dark-mode #authMessage {
+            color: #ff5252;
+        }
+        .account-details {
+            display: none;
+            text-align: center;
+        }
+        .account-details.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header class="header inner-header">
+        <a class="wordmark" href="index.html">C053 <span>CAFE</span></a>
+        <button class="nav-toggle" aria-expanded="false" aria-controls="nav">Menu</button>
+        <nav id="nav" class="nav">
+            <a href="menu.html">Menu</a>
+            <a href="about.html">Our craft</a>
+            <a href="visit.html">Visit</a>
+            <a href="login.html">Account</a>
+        </nav>
+        <a class="order-button" href="menu.html">Order ahead</a>
+    </header>
+    <main>
+        <section class="page-hero">
+            <p class="kicker">YOUR C053</p>
+            <h1>My <em>account.</em></h1>
+        </section>
+
+        <div class="auth-container">
+            <div id="authForms">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-target="login">Login</button>
+                    <button class="auth-tab" data-target="register">Register</button>
+                </div>
+
+                <form id="loginForm" class="auth-form active">
+                    <label for="loginEmail">Email address</label>
+                    <input type="email" id="loginEmail" required>
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                    <button type="submit" class="button dark">Log In</button>
+                </form>
+
+                <form id="registerForm" class="auth-form">
+                    <label for="registerEmail">Email address</label>
+                    <input type="email" id="registerEmail" required>
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required>
+                    <button type="submit" class="button dark">Create Account</button>
+                </form>
+                
+                <div id="authMessage"></div>
+            </div>
+
+            <div id="accountDetails" class="account-details">
+                <h3>Welcome back.</h3>
+                <p>You are successfully logged in.</p>
+                <button id="logoutButton" class="button dark" style="margin-top: 1rem;">Log Out</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <a class="wordmark" href="index.html">C053 <span>CAFE</span></a>
+        <p>Considered coffee. Generous hospitality.</p>
+        <p>© 2026 C053 Cafe</p>
+    </footer>
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.auth-tab');
+            const forms = document.querySelectorAll('.auth-form');
+            const authForms = document.getElementById('authForms');
+            const accountDetails = document.getElementById('accountDetails');
+            const authMessage = document.getElementById('authMessage');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    forms.forEach(f => f.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.target + 'Form').classList.add('active');
+                    authMessage.textContent = '';
+                });
+            });
+
+            const updateUI = () => {
+                const token = localStorage.getItem('co2_token');
+                if (token) {
+                    authForms.style.display = 'none';
+                    accountDetails.classList.add('active');
+                } else {
+                    authForms.style.display = 'block';
+                    accountDetails.classList.remove('active');
+                }
+            };
+            
+            updateUI();
+
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                localStorage.removeItem('co2_token');
+                localStorage.removeItem('c053-cart');
+                cart.clear();
+                renderCart();
+                updateUI();
+                notify('You have been logged out.');
+            });
+
+            const handleAuth = async (endpoint, email, password, successMsg) => {
+                try {
+                    const res = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Authentication failed');
+                    
+                    if (data.token) {
+                        localStorage.setItem('co2_token', data.token);
+                        if (typeof syncCartFromBackend === 'function') {
+                            await syncCartFromBackend();
+                        }
+                    } else if (endpoint === '/api/register') {
+                        notify(successMsg);
+                        tabs[0].click();
+                        return;
+                    }
+                    
+                    updateUI();
+                    notify(successMsg);
+                } catch (err) {
+                    authMessage.textContent = err.message;
+                }
+            };
+
+            document.getElementById('loginForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleAuth('/api/login', document.getElementById('loginEmail').value, document.getElementById('loginPassword').value, 'Successfully logged in.');
+            });
+
+            document.getElementById('registerForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleAuth('/api/register', document.getElementById('registerEmail').value, document.getElementById('registerPassword').value, 'Account created. Please log in.');
+            });
+        });
+    </script>
+</body>
+</html>
