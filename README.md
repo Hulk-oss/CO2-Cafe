@@ -1,76 +1,108 @@
-# CO2 Cafe ☕
+# CO2 Cafe Platform
 
 ![CO2 Cafe](images/Coffee-Shop.png)
 
-Welcome to the **CO2 Cafe** repository! This project is a fully-featured, premium e-commerce and cafe website. It combines an elegantly crafted front-end design with a robust Python Flask back-end to handle user authentication, product cataloging, and cart management.
+## Overview
 
-## 🌟 Features
+The CO2 Cafe platform is a comprehensive, production-ready web application designed for premium coffee shops and boutique eateries. It offers a seamless, high-performance user experience, combining an elegantly crafted vanilla front-end with a secure and scalable Python-based back-end architecture. The platform supports dynamic user interactions, secure authentication, and robust session management to deliver an uninterrupted e-commerce and editorial experience.
 
-- **Beautiful, Responsive UI**: Built with pure HTML, CSS, and Vanilla JavaScript for maximum performance and a premium feel.
-- **Dark Mode Support**: Seamlessly toggles between light and dark themes based on user preference, with persistence.
-- **User Authentication**: Secure JWT-based tokenization for user registration and login.
-- **Persistent Shopping Cart**:
-  - For guests: The cart is saved in the browser's `localStorage` so items never vanish when navigating across pages.
-  - For logged-in users: Cart state is synced with the backend database for cross-session continuity.
-- **Dynamic Content**: Interactions like reading journal entries, viewing menus, and simulating an e-commerce checkout flow.
+## System Architecture
 
-## 🏗️ Architecture & Tech Stack
+The application operates on a lightweight, yet powerful technology stack, ensuring minimal overhead and maximal performance.
 
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript (ES6+).
-- **Backend**: Python 3.x, Flask (`app.py`), PyJWT for Tokenization.
-- **Database**: SQLite (managed via the built-in `sqlite3` module).
+### Front-End Infrastructure
+- **Core Technologies**: HTML5, CSS3, Vanilla JavaScript (ES6+).
+- **Design System**: A fully responsive, grid-based layout utilizing modern CSS variables for a comprehensive design token system.
+- **Theming**: Native implementation of light and dark mode toggles with persistent state stored in `localStorage`.
+- **Performance Optimization**: Intersection Observers are utilized for lazy-loading elements and triggering scroll-based animations without impacting the main thread.
 
-## 🚀 Getting Started
+### Back-End Infrastructure
+- **Framework**: Python 3.x with Flask, providing a lightweight WSGI web application framework.
+- **Authentication Strategy**: JSON Web Tokens (JWT) facilitated via `PyJWT`. Authentication routes are protected against unauthorized access, utilizing Werkzeug's security modules for PBKDF2 HMAC SHA256 password hashing.
+- **Data Persistence**: SQLite database integrated through Python's standard `sqlite3` library. The schema includes normalized tables for user credentials and cart state.
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+## Core Features
+
+### 1. Secure User Authentication
+The platform implements a stateless authentication mechanism. Upon successful registration and login, the server issues a JWT. This token must be included in the `Authorization` header of subsequent API requests. The client securely stores this token in `localStorage`, managing session validity and enforcing access controls for protected routes (e.g., checkout and cart synchronization).
+
+### 2. Cross-Session Cart Persistence
+The cart module is engineered for high reliability, catering to both anonymous guests and authenticated users:
+- **Guest Users**: Cart operations are synchronized in real-time with the browser's `localStorage`. This guarantees that items are preserved across page navigations and browser restarts without requiring server-side state.
+- **Authenticated Users**: The local cart state is securely synchronized with the back-end database. The `/api/cart` endpoints ensure that the user's cart is maintained across entirely different devices and sessions.
+
+### 3. Dynamic Editorial Content
+The platform includes an integrated journal and storytelling mechanism. Articles and notes can be filtered dynamically by category using front-end data attributes, offering instantaneous content rendering without server-side rendering delays.
+
+## Installation and Deployment
 
 ### Prerequisites
+- Python 3.8 or higher
+- Git version control
 
-You need Python 3 installed on your machine.
+### Local Environment Setup
 
-### Installation
-
-1. **Clone the repository**
+1. **Clone the Repository**
    ```bash
    git clone https://github.com/Hulk-oss/CO2-Cafe.git
    cd CO2-Cafe
    ```
 
-2. **Install dependencies**
-   It's recommended to use a virtual environment:
+2. **Initialize a Virtual Environment**
+   It is highly recommended to isolate dependencies using a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
+
+3. **Install Dependencies**
+   Install the required Python packages defined in the requirements file:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Run the Application**
+4. **Initialize the Database and Start the Server**
+   Execute the main application script. The SQLite database schema will be automatically generated upon initial execution.
    ```bash
    python app.py
    ```
-   *The SQLite database (`database.db`) will be automatically created on the first run.*
 
-4. **Visit the Cafe**
-   Open your browser and navigate to:
-   [http://127.0.0.1:5000](http://127.0.0.1:5000)
+5. **Access the Application**
+   The application will be accessible via a local development server at:
+   `http://127.0.0.1:5000`
 
-## 📡 API Endpoints
+## API Reference
 
-The Flask application exposes the following RESTful endpoints under `/api/`:
+The back-end exposes a RESTful API to manage the application state. All authenticated routes require the `Authorization: Bearer <token>` header.
 
-| Method | Endpoint | Description | Auth Required |
-| --- | --- | --- | --- |
-| `POST` | `/api/register` | Registers a new user account. | No |
-| `POST` | `/api/login` | Authenticates a user and returns a JWT. | No |
-| `GET` | `/api/cart` | Retrieves the authenticated user's cart. | Yes (JWT) |
-| `POST` | `/api/cart` | Saves the user's cart to the database. | Yes (JWT) |
-| `POST` | `/api/checkout` | Processes the checkout and clears the cart. | Yes (JWT) |
+### Authentication
+- `POST /api/register`
+  - Payload: `{ "email": "user@example.com", "password": "securepassword" }`
+  - Response: Returns a 201 status code upon successful account creation.
 
-## 🛡️ Security
+- `POST /api/login`
+  - Payload: `{ "email": "user@example.com", "password": "securepassword" }`
+  - Response: Returns a 200 status code containing the JWT (`{ "token": "<jwt_string>" }`).
 
-We take security seriously. Please refer to our [SECURITY.md](SECURITY.md) for information on our security policies, supported versions, and how to safely report vulnerabilities.
+### Cart Management
+- `GET /api/cart`
+  - Authorization: Required.
+  - Response: Returns the serialized cart state associated with the authenticated user.
 
-## 🤝 Contributing
+- `POST /api/cart`
+  - Authorization: Required.
+  - Payload: `{ "cart": { "Item Name": { "price": 120, "quantity": 1 } } }`
+  - Response: Returns a 200 status code indicating successful state synchronization.
 
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page if you want to contribute.
+### Order Processing
+- `POST /api/checkout`
+  - Authorization: Required.
+  - Response: Processes the order, clears the user's database cart, and returns a confirmation message.
 
----
-*Considered coffee. Generous hospitality. © 2026 CO2 Cafe*
+## Security Overview
+
+The platform is designed with foundational security principles in mind. All passwords undergo cryptographic hashing, and state-changing API endpoints enforce strict token validation. For detailed information regarding our vulnerability reporting processes and active support windows, please review the `SECURITY.md` file located in the repository root.
+
+## License and Copyright
+
+© 2026 CO2 Cafe. All rights reserved.
