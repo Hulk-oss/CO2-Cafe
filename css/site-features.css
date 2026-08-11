@@ -1,0 +1,96 @@
+.site-utility{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  z-index:40;
+  display:flex;
+  gap:9px;
+}
+.site-utility button{
+  width:42px;
+  height:42px;
+  border:1px solid var(--line);
+  border-radius:50%;
+  background:var(--paper);
+  color:var(--ink);
+  box-shadow:0 12px 30px rgba(28,22,17,.16);
+  cursor:pointer;
+  font-size:18px;
+  line-height:1;
+  transition:transform .2s ease,opacity .2s ease,background .2s ease,color .2s ease;
+}
+.site-utility button:hover{
+  transform:translateY(-2px);
+  background:var(--ink);
+  color:#fff;
+}
+.site-utility [data-top]{
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(8px);
+}
+.site-utility [data-top].visible{
+  opacity:1;
+  pointer-events:auto;
+  transform:translateY(0);
+}
+html.dark-mode{
+  --ink:#f4eee8;
+  --paper:#211d19;
+  --cream:#332b25;
+  --line:#5e5147;
+  --rust:#d99775;
+}
+html.dark-mode body,
+html.dark-mode .header.is-scrolled,
+html.dark-mode .order-desk,
+html.dark-mode .story-modal-card{
+  background:var(--paper);
+  color:var(--ink);
+}
+html.dark-mode .page-hero,
+html.dark-mode .section,
+html.dark-mode .gift-panel,
+html.dark-mode .journal-tools,
+html.dark-mode .journal-card,
+html.dark-mode .products article,
+html.dark-mode .reservation,
+html.dark-mode .visit-details,
+html.dark-mode .club,
+html.dark-mode .guest-notes,
+html.dark-mode .note,
+html.dark-mode .experience{
+  background:var(--paper);
+  color:var(--ink);
+}
+html.dark-mode input,
+html.dark-mode textarea,
+html.dark-mode select,
+html.dark-mode .gift-preview,
+html.dark-mode .desk-item,
+html.dark-mode .collection,
+html.dark-mode .visit-status{
+  background:#2b251f;
+  border-color:var(--line);
+  color:var(--ink);
+}
+html.dark-mode p,
+html.dark-mode .save-story,
+html.dark-mode .gift-preview p:not(.kicker),
+html.dark-mode .story-modal-card p:last-child{
+  color:#d9cdc2;
+}
+html.dark-mode footer{
+  background:#17130f;
+  color:var(--ink);
+}
+@media(max-width:720px){
+  .site-utility{
+    right:14px;
+    bottom:14px;
+  }
+  .site-utility button{
+    width:40px;
+    height:40px;
+  }
+}
