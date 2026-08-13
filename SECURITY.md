@@ -23,6 +23,10 @@ We take the security of this project seriously. If you discover a security vulne
 We will acknowledge receipt of your vulnerability report within 48 hours and strive to send you regular updates about our progress. Once the issue is resolved, we will publish a security advisory and notify you.
 
 ## Current Security Mechanisms
+
 - **Authentication**: We use `PyJWT` for stateless, secure session management.
 - **Passwords**: All passwords are hashed using `werkzeug.security` (PBKDF2 HMAC SHA256) before being stored in the database.
 - **Cart Syncing**: API endpoints manipulating user data require a valid `Bearer` token in the `Authorization` header.
+- **Rate Limiting**: Endpoints such as `/api/login` and `/api/register` are protected against brute-force attacks via strict IP-based rate limiting.
+- **Cross-Site Scripting (XSS) Prevention**: All user-provided data (e.g., during checkout or profile management) is thoroughly sanitized both server-side (`html.escape`) and client-side (`window.escapeHTML`) prior to storage and rendering.
+- **HTTP Security Headers**: The application uses robust security headers, including `Content-Security-Policy (CSP)`, `Strict-Transport-Security (HSTS)`, `X-Frame-Options`, and `X-Content-Type-Options` to mitigate common browser-based attacks.
