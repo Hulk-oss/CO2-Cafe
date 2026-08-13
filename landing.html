@@ -88,7 +88,6 @@ svg, .dust {
   color: #f84356;
   text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
   z-index: 50;
-  white-space: nowrap;
 }
 
 @supports (-webkit-text-stroke: 2px black) {
@@ -139,7 +138,7 @@ svg, .dust {
   .enter-btn { top: auto; bottom: 20px; right: 20px; padding: 10px 16px; font-size: 14px; }
   
   .homesTxt, .hutTxt, .pagodaTxt, .towerTxt, .gatesTxt, .endTxt {
-    font-size: 60px;
+    font-size: 40px;
   }
 }
 </style>
@@ -231,21 +230,21 @@ window.onload = ()=> {
 
 	    .set('.breakable',	{xPercent:-50, yPercent:-100, draggable:false, cursor:'pointer'}) 
 	    .set('#tower', 		  {x:2400, y:1750})
-	    .set('.towerTxt',	  {x:2320, y:1380})
+	    .set('.towerTxt',	  {x:2320, y:1380, xPercent:-50, textAlign:'center', width:600})
 
 	    .set('#pagoda', 	  {x:2000, y:1702})
-	    .set('.pagodaTxt',	{x:1900, y:1533})
+	    .set('.pagodaTxt',	{x:1900, y:1533, xPercent:-50, textAlign:'center', width:600})
 	    
 	    .set('#hut', 		    {x:1496, y:1860})
-	    .set('.hutTxt',		  {x:1440, y:1665})
+	    .set('.hutTxt',		  {x:1440, y:1665, xPercent:-50, textAlign:'center', width:600})
 
 	    .set('#homes', 		  {x:1308, y:1923})
-	    .set('.homesTxt',	  {x:1210, y:1806})
+	    .set('.homesTxt',	  {x:1210, y:1806, xPercent:-50, textAlign:'center', width:600})
 
 	    .set('#gates', 		  {x:2730, y:1584})
-	    .set('.gatesTxt',	  {x:2660, y:1404})
+	    .set('.gatesTxt',	  {x:2660, y:1404, xPercent:-50, textAlign:'center', width:600})
 
-	    .set('.endTxt',		  {x:3300, y:1500})
+	    .set('.endTxt',		  {x:3300, y:1500, xPercent:-50, textAlign:'center', width:600})
 
 	    .to('#container',   {opacity:1, ease:'power1.inOut', duration:1}, 0.3) // fade in the scene
   
