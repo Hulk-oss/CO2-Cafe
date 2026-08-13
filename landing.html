@@ -249,6 +249,18 @@ window.onload = ()=> {
 	    .to('#container',   {opacity:1, ease:'power1.inOut', duration:1}, 0.3) // fade in the scene
   
   
+  // Add a continuous floating animation so the text isn't statically stable
+  gsap.to('.homesTxt, .hutTxt, .pagodaTxt, .towerTxt, .gatesTxt, .endTxt', {
+    yPercent: -20,
+    scale: 1.05,
+    rotation: 1,
+    duration: 2,
+    yoyo: true,
+    repeat: -1,
+    ease: 'sine.inOut',
+    stagger: 0.3
+  });
+
   // re-center the container if window changes size
   window.onresize = ()=> {
       currentScale = window.innerWidth < 800 ? window.innerWidth / 800 : 1;
