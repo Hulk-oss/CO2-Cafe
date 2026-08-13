@@ -84,6 +84,11 @@ html.dark-mode footer{
   background:#17130f;
   color:var(--ink);
 }
+html.dark-mode .inner-header{background:var(--paper);color:var(--ink);border-color:var(--line)}
+html.dark-mode .inner-header .nav-toggle,html.dark-mode .inner-header .account-button{color:var(--ink)}
+html.dark-mode .inner-header .order-button{background:var(--ink)!important;color:var(--paper)!important;border-color:var(--ink)!important}
+html.dark-mode .cta-band .button.light{background:#fff;color:#201c18;border-color:#fff}
+.account-button{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.11em;white-space:nowrap}
 @media(max-width:720px){
   .site-utility{
     right:14px;
