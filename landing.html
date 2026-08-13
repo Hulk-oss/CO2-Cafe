@@ -119,6 +119,20 @@ svg, .dust {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 #000;
 }
+
+@media (max-width: 800px) {
+  .preTitle { left: 20px; top: 20px; font-size: 16px; }
+  #boojeeTitle { left: 10px; top: 50px; font-size: 50px; }
+  .titleChar { text-shadow: 3px 3px 0 #000; }
+  @supports (-webkit-text-stroke: 4px black) {
+    #boojeeTitle { -webkit-text-stroke: 2px black; }
+  }
+  .blurb { left: 20px; bottom: 30px; font-size: 14px; width: auto; right: 20px; }
+  .enter-btn { top: auto; bottom: 20px; right: 20px; padding: 10px 16px; font-size: 14px; }
+  .homesTxt, .hutTxt, .pagodaTxt, .towerTxt, .gatesTxt, .endTxt {
+    font-size: 20px;
+  }
+}
 </style>
 </head>
 <body>
@@ -189,10 +203,12 @@ window.onload = ()=> {
   let povMoving, // is true when the point-of-view is currently moving
       walkDir = 1; // 1 for walking right, -1 for walking left
 
+  let currentScale = window.innerWidth < 800 ? window.innerWidth / 800 : 1;
+
 	// set initial states
 	gsap.timeline() 
 	    .set('#scrollDist', {width:'100%', height:'750%'}) // height defines how far we'll scroll
-	    .set('#container', 	{position:'fixed', width:4100, height:3000, transformOrigin:'0 0', left:window.innerWidth/2, top:window.innerHeight/2 + 100})
+	    .set('#container', 	{position:'fixed', width:4100, height:3000, transformOrigin:'0 0', left:window.innerWidth/2, top:window.innerHeight/2 + 100 * currentScale, scale: currentScale})
 	    .set('.seq', 		    {xPercent:-75, yPercent:-11})
 	    .set('#mouth', 		  {x:35, y:-240})
         
@@ -221,7 +237,10 @@ window.onload = ()=> {
   
   
   // re-center the container if window changes size
-  window.onresize = ()=> gsap.set('#container', {left:window.innerWidth/2, top:window.innerHeight/2 + 100});
+  window.onresize = ()=> {
+      currentScale = window.innerWidth < 800 ? window.innerWidth / 800 : 1;
+      gsap.set('#container', {left:window.innerWidth/2, top:window.innerHeight/2 + 100 * currentScale, scale: currentScale});
+  };
 
 
 	// make clouds
@@ -323,10 +342,10 @@ window.onload = ()=> {
 
 	gsap.ticker.add(() => {    
     // tween container position
-		gsap.to('#container', {duration:0.5, ease:'sine', x:-gsap.getProperty('.kaiju', 'x'), y:-gsap.getProperty('.kaiju', 'y')})
+		gsap.to('#container', {duration:0.5, ease:'sine', x:-gsap.getProperty('.kaiju', 'x') * currentScale, y:-gsap.getProperty('.kaiju', 'y') * currentScale})
 
 		// update flag for walking loop
-		povMoving = Math.abs( gsap.getProperty('#container', 'x') + gsap.getProperty('.kaiju', 'x') ) > 5 // true when x difference is more than 5
+		povMoving = Math.abs( gsap.getProperty('#container', 'x') + gsap.getProperty('.kaiju', 'x') * currentScale ) > 5 // true when x difference is more than 5
 
 		// trigger walking sequence
     if ( povMoving && !gsap.isTweening('.walk') ) walkSeq.play(0);
