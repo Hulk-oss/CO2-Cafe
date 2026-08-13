@@ -83,6 +83,21 @@ svg, .dust {
   font-size:15px;
 }
 
+.homesTxt, .hutTxt, .pagodaTxt, .towerTxt, .gatesTxt, .endTxt {
+  font-size: 32px;
+  color: #f84356;
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  z-index: 50;
+  white-space: nowrap;
+}
+
+@supports (-webkit-text-stroke: 2px black) {
+  .homesTxt, .hutTxt, .pagodaTxt, .towerTxt, .gatesTxt, .endTxt {
+    -webkit-text-stroke: 2px black;
+    text-shadow: 4px 4px 0 #000;
+  }
+}
+
 /* Enter cafe button */
 .enter-btn {
   position: fixed;
