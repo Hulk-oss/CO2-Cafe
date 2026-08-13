@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Boojee Cafe (formerly CO2 Cafe) platform is a comprehensive, production-ready web application designed for premium coffee shops and boutique eateries. It offers a seamless, high-performance user experience, combining an elegantly crafted vanilla front-end with a secure and scalable Python-based back-end architecture. The platform supports dynamic user interactions, secure authentication, and robust session management to deliver an uninterrupted e-commerce and editorial experience.
+The Boojee Cafe (formerly Boojee Cafe) platform is a comprehensive, production-ready web application designed for premium coffee shops and boutique eateries. It offers a seamless, high-performance user experience, combining an elegantly crafted vanilla front-end with a secure and scalable Python-based back-end architecture. The platform supports dynamic user interactions, secure authentication, and robust session management to deliver an uninterrupted e-commerce and editorial experience.
 
 ## System Architecture
 
@@ -47,8 +47,8 @@ The application features a captivating entry point (`landing.html`) built with G
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/Hulk-oss/CO2-Cafe.git
-   cd CO2-Cafe
+   git clone https://github.com/Hulk-oss/Boojee-Cafe.git
+   cd Boojee-Cafe
    ```
 
 2. **Initialize a Virtual Environment**

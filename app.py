@@ -117,7 +117,7 @@ def register():
     user_id = cursor.lastrowid
     conn.close()
     token = jwt.encode({'user_id': user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)}, app.config['SECRET_KEY'], algorithm='HS256')
-    return jsonify({'message': 'Welcome to CO₂ Cafe.', 'token': token, 'user': {'email': email}}), 201
+    return jsonify({'message': 'Welcome to Boojee Cafe.', 'token': token, 'user': {'email': email}}), 201
 
 @app.route('/api/login', methods=['POST'])
 def login():

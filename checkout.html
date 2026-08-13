@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Checkout | CO₂ Cafe</title>
+  <title>Checkout | Boojee Cafe</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
@@ -58,7 +58,7 @@
 </head>
 <body>
   <header class="header inner-header">
-    <a class="wordmark" href="index.html">CO₂ <span>CAFE</span></a>
+    <a class="wordmark" href="index.html">Boojee <span>CAFE</span></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="nav">Menu</button>
     <nav id="nav" class="nav"><a href="menu.html">Menu</a><a href="about.html">Our craft</a><a href="visit.html">Visit</a></nav>
     <a class="order-button" href="menu.html">Order ahead</a>
@@ -110,11 +110,11 @@
       </aside>
     </div>
   </main>
-  <footer><a class="wordmark" href="index.html">CO₂ <span>CAFE</span></a><p>Considered coffee. Generous hospitality.</p><p>2026 CO₂ Cafe</p></footer>
+  <footer><a class="wordmark" href="index.html">Boojee <span>CAFE</span></a><p>Considered coffee. Generous hospitality.</p><p>2026 Boojee Cafe</p></footer>
   <script src="js/script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      const token = localStorage.getItem('co2_token');
+      const token = localStorage.getItem('boojee_token');
       if (!token) { location.replace('login.html'); return; }
 
       const items = document.getElementById('summaryItems');
@@ -128,11 +128,11 @@
       const swipeThumb = document.getElementById('swipeThumb');
       const swipeProgress = document.getElementById('swipeProgress');
       const swipeLabel = document.getElementById('swipeLabel');
-      let cupSize = localStorage.getItem('c053-cup-size') || 'Regular';
+      let cupSize = localStorage.getItem('boojee-cup-size') || 'Regular';
       let submitted = false;
 
       const sizeImages = { Small: 'images/menu-espresso.png', Regular: 'images/menu-flat-white.png', Large: 'images/menu-cappuccino.png' };
-      const readCart = () => new Map(JSON.parse(localStorage.getItem('c053-cart') || '[]'));
+      const readCart = () => new Map(JSON.parse(localStorage.getItem('boojee-cart') || '[]'));
       const render = () => {
         const cart = readCart();
         let amount = 0;
@@ -147,7 +147,7 @@
       };
       const setCupSize = size => {
         cupSize = size;
-        localStorage.setItem('c053-cup-size', size);
+        localStorage.setItem('boojee-cup-size', size);
         cupStage.dataset.size = size;
         cupPreview.src = sizeImages[size];
         selectedCup.textContent = `${size} cup`;
@@ -163,9 +163,9 @@
         const res = await fetch('/api/cart', { headers: { Authorization: `Bearer ${token}` } });
         if (res.status === 401) throw new Error();
         const data = await res.json();
-        if (data.cart && Object.keys(data.cart).length) localStorage.setItem('c053-cart', JSON.stringify(Object.entries(data.cart)));
+        if (data.cart && Object.keys(data.cart).length) localStorage.setItem('boojee-cart', JSON.stringify(Object.entries(data.cart)));
       } catch {
-        localStorage.removeItem('co2_token');
+        localStorage.removeItem('boojee_token');
         location.replace('login.html');
         return;
       }
@@ -196,8 +196,8 @@
           const res = await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`}, body:JSON.stringify(payload) });
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || 'Checkout failed.');
-          localStorage.setItem('c053-cart', '[]');
-          document.cookie = `c053_last_order=${data.order_id}; max-age=86400; path=/; SameSite=Lax`;
+          localStorage.setItem('boojee-cart', '[]');
+          document.cookie = `boojee_last_order=${data.order_id}; max-age=86400; path=/; SameSite=Lax`;
           message.textContent = `${data.message} Order #${data.order_id}.`;
           message.classList.add('success');
           swipeLabel.textContent = 'Order confirmed';

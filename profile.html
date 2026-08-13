@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Profile | CO₂ Cafe</title>
+  <title>Profile | Boojee Cafe</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     .account{max-width:1080px;margin:auto;padding:110px 28px 90px}
@@ -24,7 +24,7 @@
 </head>
 <body>
   <header class="header inner-header">
-    <a class="wordmark" href="index.html">CO₂ <span>CAFE</span></a>
+    <a class="wordmark" href="index.html">Boojee <span>CAFE</span></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="nav">Menu</button>
     <nav id="nav" class="nav">
       <a href="menu.html">Menu</a>
@@ -34,7 +34,7 @@
     <a class="order-button" href="menu.html">Order ahead</a>
   </header>
   <main class="account">
-    <p class="kicker">YOUR CO₂</p>
+    <p class="kicker">YOUR Boojee</p>
     <h1>Your <em>Profile.</em></h1>
     <div class="account-shell">
       <section id="profile" class="profile" style="display:block;">
@@ -69,14 +69,14 @@
     </div>
   </main>
   <footer>
-    <a class="wordmark" href="index.html">CO₂ <span>CAFE</span></a>
+    <a class="wordmark" href="index.html">Boojee <span>CAFE</span></a>
     <p>Considered coffee. Generous hospitality.</p>
   </footer>
   <script src="js/script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const loadProfile = async () => {
-        const token = localStorage.getItem('co2_token');
+        const token = localStorage.getItem('boojee_token');
         if (!token) {
           window.location.href = 'login.html';
           return;
@@ -95,12 +95,12 @@
             ? data.orders.map(o => `<div class="order-row"><span><strong>Order #${o.id}</strong><small>${o.cup_size || 'Regular'} cup · Collection: ${o.collection_time}</small></span><span><strong>₹${Number(o.total).toLocaleString('en-IN')}</strong><small>${o.status}</small></span></div>`).join('')
             : '<p>No orders yet. Your next coffee is waiting.</p>';
         } catch {
-          localStorage.removeItem('co2_token');
+          localStorage.removeItem('boojee_token');
           window.location.href = 'login.html';
         }
       };
       document.getElementById('logoutButton').onclick = () => {
-        localStorage.removeItem('co2_token');
+        localStorage.removeItem('boojee_token');
         notify('You have been logged out.');
         window.location.href = 'login.html';
       };
