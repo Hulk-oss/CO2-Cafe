@@ -1,11 +1,27 @@
 import os
 import sqlite3
 import datetime
+import time
 from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+import html
+
+# In-memory rate limiting store (IP -> list of timestamps)
+rate_limits = {}
+
+def is_rate_limited(ip, limit=5, window=60):
+    now = time.time()
+    if ip not in rate_limits:
+        rate_limits[ip] = []
+    # Clean up old timestamps
+    rate_limits[ip] = [t for t in rate_limits[ip] if now - t < window]
+    if len(rate_limits[ip]) >= limit:
+        return True
+    rate_limits[ip].append(now)
+    return False
 
 def load_secret_key():
     env_key = os.environ.get('CAFE_SECRET_KEY')
@@ -97,6 +113,10 @@ def token_required(f):
 
 @app.route('/api/register', methods=['POST'])
 def register():
+    client_ip = request.remote_addr
+    if is_rate_limited(client_ip):
+        return jsonify({'message': 'Too many attempts. Please try again later.'}), 429
+        
     data = request.get_json(silent=True) or {}
     email = (data.get('email') or '').strip().lower()
     password = data.get('password') or ''
@@ -121,6 +141,10 @@ def register():
 
 @app.route('/api/login', methods=['POST'])
 def login():
+    client_ip = request.remote_addr
+    if is_rate_limited(client_ip):
+        return jsonify({'message': 'Too many attempts. Please try again later.'}), 429
+        
     data = request.get_json(silent=True) or {}
     email = (data.get('email') or '').strip().lower()
     password = data.get('password') or ''
@@ -183,9 +207,10 @@ def save_cart(current_user):
 @token_required
 def checkout(current_user):
     data = request.get_json(silent=True) or {}
-    customer_name = (data.get('customer_name') or '').strip()
-    phone = (data.get('phone') or '').strip()
-    collection_time = (data.get('collection_time') or '').strip()
+    # Strict sanitization of user input to prevent Stored XSS
+    customer_name = html.escape((data.get('customer_name') or '').strip())
+    phone = html.escape((data.get('phone') or '').strip())
+    collection_time = html.escape((data.get('collection_time') or '').strip())
     cup_size = (data.get('cup_size') or 'Regular').strip()
     if not customer_name or not phone or not collection_time:
         return jsonify({'message': 'Please complete your collection details.'}), 400
@@ -233,6 +258,14 @@ def serve_static(path):
 @app.errorhandler(404)
 def page_not_found(e):
     return send_from_directory('.', '404.html'), 404
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';"
+    return response
 
 if __name__ == '__main__':
     from waitress import serve

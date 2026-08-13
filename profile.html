@@ -92,7 +92,7 @@
           document.getElementById('profileEmail').textContent = user.email;
           const data = await orders.json();
           document.getElementById('ordersList').innerHTML = data.orders.length
-            ? data.orders.map(o => `<div class="order-row"><span><strong>Order #${o.id}</strong><small>${o.cup_size || 'Regular'} cup · Collection: ${o.collection_time}</small></span><span><strong>₹${Number(o.total).toLocaleString('en-IN')}</strong><small>${o.status}</small></span></div>`).join('')
+            ? data.orders.map(o => `<div class="order-row"><span><strong>Order #${escapeHTML(o.id)}</strong><small>${escapeHTML(o.cup_size || 'Regular')} cup · Collection: ${escapeHTML(o.collection_time)}</small></span><span><strong>₹${Number(o.total).toLocaleString('en-IN')}</strong><small>${escapeHTML(o.status)}</small></span></div>`).join('')
             : '<p>No orders yet. Your next coffee is waiting.</p>';
         } catch {
           localStorage.removeItem('boojee_token');

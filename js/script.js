@@ -1,6 +1,7 @@
 ['css/enhancements.css', 'css/premium.css', 'css/commerce.css', 'css/discover.css', 'css/catalog.css', 'css/journal-gifts.css', 'css/bell-notify.css'].forEach(href => { const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = href; document.head.append(link); });
 const formatCurrency = value => `₹${Math.round(Number(value) * 25 / 10) * 10}`;
 const formatINR = value => `₹${Number(value).toLocaleString('en-IN')}`;
+window.escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag]));
 const localizeCafe = () => {
   document.title = document.title.replaceAll('Boojee', 'Boojee');
   document.querySelectorAll('a[href*="boojeecafe.com"]').forEach(link => link.href = link.href.replace('boojeecafe.com', 'boojeecafe.in'));
@@ -79,7 +80,7 @@ const desk = document.querySelector('.order-desk'), backdrop = document.querySel
 const openDesk = () => { desk.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow = 'hidden'; };
 const closeDesk = () => { desk.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow = ''; };
 document.querySelectorAll('.order-button,[data-order]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); openDesk(); })); document.querySelector('.desk-close').addEventListener('click', closeDesk); backdrop.addEventListener('click', closeDesk);
-function renderCart(){ let quantity=0,total=0; deskItems.replaceChildren(); if(!cart.size){deskItems.innerHTML='<p class="desk-empty">Your order is waiting for something delicious.</p>';} cart.forEach((item,name)=>{quantity+=item.quantity;total+=item.price*item.quantity;const row=document.createElement('article');row.className='desk-item';row.innerHTML=`<strong>${name}</strong><span>${item.quantity} × ${formatINR(item.price)}</span><button type="button" aria-label="Remove ${name}">Remove</button>`;row.querySelector('button').addEventListener('click',()=>{cart.delete(name);renderCart();});deskItems.append(row);}); if(count) count.textContent=quantity; deskTotal.textContent=formatINR(total); saveCart(); }
+function renderCart(){ let quantity=0,total=0; deskItems.replaceChildren(); if(!cart.size){deskItems.innerHTML='<p class="desk-empty">Your order is waiting for something delicious.</p>';} cart.forEach((item,name)=>{quantity+=item.quantity;total+=item.price*item.quantity;const row=document.createElement('article');row.className='desk-item';row.innerHTML=`<strong>${escapeHTML(name)}</strong><span>${escapeHTML(item.quantity)} × ${formatINR(item.price)}</span><button type="button" aria-label="Remove ${escapeHTML(name)}">Remove</button>`;row.querySelector('button').addEventListener('click',()=>{cart.delete(name);renderCart();});deskItems.append(row);}); if(count) count.textContent=quantity; deskTotal.textContent=formatINR(total); saveCart(); }
 renderCart();
 document.querySelectorAll('[data-add]').forEach(button => button.addEventListener('click', () => { const name=button.dataset.add, product=cart.get(name)||{price:Number(button.dataset.price)||prices[name]||0,quantity:0}; product.quantity+=1;cart.set(name,product);renderCart();notify(`${name} added to your order.`); }));
 document.querySelector('.desk-checkout').addEventListener('click', async () => {
