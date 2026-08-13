@@ -1,10 +1,10 @@
-# CO2 Cafe Platform
+# Boojee Cafe Platform
 
-![CO2 Cafe](images/Coffee-Shop.png)
+![Boojee Cafe](images/Coffee-Shop.png)
 
 ## Overview
 
-The CO2 Cafe platform is a comprehensive, production-ready web application designed for premium coffee shops and boutique eateries. It offers a seamless, high-performance user experience, combining an elegantly crafted vanilla front-end with a secure and scalable Python-based back-end architecture. The platform supports dynamic user interactions, secure authentication, and robust session management to deliver an uninterrupted e-commerce and editorial experience.
+The Boojee Cafe (formerly CO2 Cafe) platform is a comprehensive, production-ready web application designed for premium coffee shops and boutique eateries. It offers a seamless, high-performance user experience, combining an elegantly crafted vanilla front-end with a secure and scalable Python-based back-end architecture. The platform supports dynamic user interactions, secure authentication, and robust session management to deliver an uninterrupted e-commerce and editorial experience.
 
 ## System Architecture
 
@@ -33,6 +33,9 @@ The cart module is engineered for high reliability, catering to both anonymous g
 
 ### 3. Dynamic Editorial Content
 The platform includes an integrated journal and storytelling mechanism. Articles and notes can be filtered dynamically by category using front-end data attributes, offering instantaneous content rendering without server-side rendering delays.
+
+### 4. Interactive Animated Landing Page
+The application features a captivating entry point (`landing.html`) built with GSAP and ScrollTrigger. It uses a scroll-linked animation to deliver a highly interactive, cinematic introduction to the Boojee Cafe brand before smoothly transitioning users to the main application.
 
 ## Installation and Deployment
 
@@ -105,4 +108,4 @@ The platform is designed with foundational security principles in mind. All pass
 
 ## License and Copyright
 
-© 2026 CO2 Cafe. All rights reserved.
+© 2026 Boojee Cafe. All rights reserved.

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Currently, only the latest `main` branch of **CO2 Cafe** is actively supported with security updates. 
+Currently, only the latest `main` branch of **Boojee Cafe** is actively supported with security updates. 
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -11,10 +11,10 @@ Currently, only the latest `main` branch of **CO2 Cafe** is actively supported w
 
 ## Reporting a Vulnerability
 
-We take the security of this project seriously. If you discover a security vulnerability within CO2 Cafe, please follow these steps to report it:
+We take the security of this project seriously. If you discover a security vulnerability within Boojee Cafe, please follow these steps to report it:
 
 1. **Do not open a public issue.** This ensures that the vulnerability is not exploited before a patch is released.
-2. **Email the maintainers directly** at `security@co2cafe.in` (or the repository owner's email).
+2. **Email the maintainers directly** at `security@boojee.cafe` (or the repository owner's email).
 3. Include the following details in your report:
    - A description of the vulnerability and its potential impact.
    - Detailed steps to reproduce the issue.
