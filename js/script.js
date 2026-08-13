@@ -53,7 +53,28 @@ window.syncCartFromBackend = async () => {
 };
 syncCartFromBackend();
 const count = document.querySelector('#cartCount'); const prices = {'Velvet Hot Chocolate':120,'Garden Strawberry Tart':150,'Dark Chocolate Cookie':100};
-document.body.insertAdjacentHTML('beforeend', '<div class="desk-backdrop"></div><aside class="order-desk" aria-label="Your order"><div class="desk-head"><div><p class="kicker">CLICK & COLLECT</p><h2>Your order</h2></div><button class="desk-close" type="button">Close</button></div><div class="desk-items"><p class="desk-empty">Your order is waiting for something delicious.</p></div><div class="collection"><label for="collectionTime">Collection time</label><select id="collectionTime"><option>As soon as possible · 15 min</option><option>In 30 minutes</option><option>In 45 minutes</option><option>In 1 hour</option></select></div><div class="desk-total"><span>Total</span><strong>£0.00</strong></div><button class="button dark desk-checkout" type="button">Continue to secure checkout</button><p class="checkout-note">A secure payment flow can be connected here.</p></aside>');
+document.body.insertAdjacentHTML('beforeend', '<div class="desk-backdrop"></div><aside class="order-desk" aria-label="Your order"><div class="desk-head"><div><p class="kicker">CLICK & COLLECT</p><h2>Your order</h2></div><button class="desk-close" type="button">Close</button></div><div class="desk-items"><p class="desk-empty">Your order is waiting for something delicious.</p></div><div class="collection"><label for="collectionTime">⏳ Collection time</label><select id="collectionTime"></select></div><div class="desk-total"><span>Total</span><strong>£0.00</strong></div><button class="button dark desk-checkout" type="button">Continue to secure checkout</button><p class="checkout-note">A secure payment flow can be connected here.</p></aside>');
+const updateCollectionTimes = () => {
+    const select = document.getElementById('collectionTime');
+    if (!select) return;
+    const now = new Date();
+    const formatTime = (addMinutes) => {
+        const t = new Date(now.getTime() + addMinutes * 60000);
+        return t.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    };
+    const prevValue = select.value;
+    select.innerHTML = `
+        <option value="15">Asap · ${formatTime(15)}</option>
+        <option value="30">In 30 mins · ${formatTime(30)}</option>
+        <option value="45">In 45 mins · ${formatTime(45)}</option>
+        <option value="60">In 1 hour · ${formatTime(60)}</option>
+    `;
+    if (prevValue && select.querySelector(`[value="${prevValue}"]`)) {
+        select.value = prevValue;
+    }
+};
+updateCollectionTimes();
+setInterval(updateCollectionTimes, 60000);
 const desk = document.querySelector('.order-desk'), backdrop = document.querySelector('.desk-backdrop'), deskItems = document.querySelector('.desk-items'), deskTotal = document.querySelector('.desk-total strong');
 const openDesk = () => { desk.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow = 'hidden'; };
 const closeDesk = () => { desk.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow = ''; };
