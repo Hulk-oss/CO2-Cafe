@@ -1,7 +1,5 @@
 # Boojee Cafe Platform
 
-![Boojee Cafe](images/Coffee-Shop.png)
-
 ## Overview
 
 The Boojee Cafe (formerly Boojee Cafe) platform is a comprehensive, production-ready web application designed for premium coffee shops and boutique eateries. It offers a seamless, high-performance user experience, combining an elegantly crafted vanilla front-end with a secure and scalable Python-based back-end architecture. The platform supports dynamic user interactions, secure authentication, and robust session management to deliver an uninterrupted e-commerce and editorial experience.
