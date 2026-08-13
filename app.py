@@ -27,7 +27,12 @@ def load_secret_key():
     env_key = os.environ.get('CAFE_SECRET_KEY')
     if env_key:
         return env_key
-    secret_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'secret.key')
+    
+    if os.environ.get('VERCEL'):
+        secret_path = '/tmp/secret.key'
+    else:
+        secret_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'secret.key')
+        
     if os.path.exists(secret_path):
         with open(secret_path, 'r') as f:
             return f.read().strip()
@@ -38,7 +43,10 @@ def load_secret_key():
 
 app = Flask(__name__, static_folder='.')
 app.config['SECRET_KEY'] = load_secret_key()
-DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
+if os.environ.get('VERCEL'):
+    DATABASE = '/tmp/database.db'
+else:
+    DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
