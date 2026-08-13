@@ -345,13 +345,6 @@ window.onload = ()=> {
     .from('.kaiju',     {duration:2, scale:0.7}, 0)
     .to('.kaiju', 	    {duration:2, scale:0.5}, 8)
 
-    .from('.homesTxt', 	{opacity:0, yPercent:75, ease:'back.out'}, 2)
-    .from('.hutTxt', 	  {opacity:0, yPercent:75, ease:'back.out'}, 3)
-    .from('.pagodaTxt', {opacity:0, yPercent:75, ease:'back.out'}, 4.3)
-    .from('.towerTxt', 	{opacity:0, yPercent:75, ease:'back.out'}, 5.7)
-    .from('.gatesTxt', 	{opacity:0, yPercent:75, ease:'back.out'}, 6.8)
-    .from('.endTxt', 	  {opacity:0, yPercent:75, ease:'power1'}, 9.3)
-
 
 	// move container to follow kaiju
 	let walkSeq = gsap.fromTo('.walk', {y:0}, {y:-1890, ease:'steps(7)', duration:0.7})
