@@ -7,9 +7,22 @@ import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
+def load_secret_key():
+    env_key = os.environ.get('CAFE_SECRET_KEY')
+    if env_key:
+        return env_key
+    secret_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'secret.key')
+    if os.path.exists(secret_path):
+        with open(secret_path, 'r') as f:
+            return f.read().strip()
+    new_key = os.urandom(24).hex()
+    with open(secret_path, 'w') as f:
+        f.write(new_key)
+    return new_key
+
 app = Flask(__name__, static_folder='.')
-app.config['SECRET_KEY'] = 'co2-cafe-secret-key-123'  # In production, use a secure key
-DATABASE = 'database.db'
+app.config['SECRET_KEY'] = load_secret_key()
+DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
 
 def get_db():
     conn = sqlite3.connect(DATABASE)
@@ -33,6 +46,24 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            items TEXT NOT NULL,
+            total INTEGER NOT NULL,
+            cup_size TEXT NOT NULL DEFAULT 'Regular',
+            collection_time TEXT NOT NULL,
+            customer_name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'confirmed',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    order_columns = [row['name'] for row in conn.execute('PRAGMA table_info(orders)').fetchall()]
+    if 'cup_size' not in order_columns:
+        c.execute("ALTER TABLE orders ADD COLUMN cup_size TEXT NOT NULL DEFAULT 'Regular'")
     conn.commit()
     conn.close()
 
@@ -66,31 +97,33 @@ def token_required(f):
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+    data = request.get_json(silent=True) or {}
+    email = (data.get('email') or '').strip().lower()
+    password = data.get('password') or ''
     
-    if not email or not password:
-        return jsonify({'message': 'Missing email or password'}), 400
+    if not email or '@' not in email or len(password) < 8:
+        return jsonify({'message': 'Enter a valid email and a password of at least 8 characters.'}), 400
         
     hashed_password = generate_password_hash(password)
     
     conn = get_db()
     try:
-        conn.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, hashed_password))
+        cursor = conn.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, hashed_password))
         conn.commit()
     except sqlite3.IntegrityError:
         conn.close()
         return jsonify({'message': 'User already exists'}), 409
     
+    user_id = cursor.lastrowid
     conn.close()
-    return jsonify({'message': 'User registered successfully'}), 201
+    token = jwt.encode({'user_id': user_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)}, app.config['SECRET_KEY'], algorithm='HS256')
+    return jsonify({'message': 'Welcome to CO₂ Cafe.', 'token': token, 'user': {'email': email}}), 201
 
 @app.route('/api/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+    data = request.get_json(silent=True) or {}
+    email = (data.get('email') or '').strip().lower()
+    password = data.get('password') or ''
     
     conn = get_db()
     user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
@@ -104,7 +137,20 @@ def login():
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)
     }, app.config['SECRET_KEY'], algorithm='HS256')
     
-    return jsonify({'token': token}), 200
+    return jsonify({'token': token, 'user': {'email': user['email']}}), 200
+
+@app.route('/api/me', methods=['GET'])
+@token_required
+def me(current_user):
+    return jsonify({'user': {'id': current_user['id'], 'email': current_user['email']}}), 200
+
+@app.route('/api/orders', methods=['GET'])
+@token_required
+def orders(current_user):
+    conn = get_db()
+    rows = conn.execute('SELECT id, total, cup_size, collection_time, customer_name, status, created_at FROM orders WHERE user_id = ? ORDER BY id DESC', (current_user['id'],)).fetchall()
+    conn.close()
+    return jsonify({'orders': [dict(row) for row in rows]}), 200
 
 @app.route('/api/cart', methods=['GET'])
 @token_required
@@ -136,24 +182,58 @@ def save_cart(current_user):
 @app.route('/api/checkout', methods=['POST'])
 @token_required
 def checkout(current_user):
-    # In a real app, integrate payment gateway here.
-    # For now, just clear the cart.
+    data = request.get_json(silent=True) or {}
+    customer_name = (data.get('customer_name') or '').strip()
+    phone = (data.get('phone') or '').strip()
+    collection_time = (data.get('collection_time') or '').strip()
+    cup_size = (data.get('cup_size') or 'Regular').strip()
+    if not customer_name or not phone or not collection_time:
+        return jsonify({'message': 'Please complete your collection details.'}), 400
+    if cup_size not in {'Small', 'Regular', 'Large'}:
+        return jsonify({'message': 'Please choose a valid cup size.'}), 400
+
     conn = get_db()
+    saved_cart = conn.execute('SELECT cart_data FROM carts WHERE user_id = ?', (current_user['id'],)).fetchone()
+    cart = json.loads(saved_cart['cart_data']) if saved_cart else {}
+    if not cart:
+        conn.close()
+        return jsonify({'message': 'Your order is empty.'}), 400
+    total = sum(int(item.get('price', 0)) * int(item.get('quantity', 0)) for item in cart.values())
+    if total <= 0:
+        conn.close()
+        return jsonify({'message': 'Your order could not be priced.'}), 400
+    cursor = conn.execute(
+        '''INSERT INTO orders (user_id, items, total, cup_size, collection_time, customer_name, phone, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+        (current_user['id'], json.dumps(cart), total, cup_size, collection_time, customer_name, phone,
+         datetime.datetime.utcnow().isoformat(timespec='seconds'))
+    )
     conn.execute('DELETE FROM carts WHERE user_id = ?', (current_user['id'],))
     conn.commit()
     conn.close()
-    return jsonify({'message': 'Checkout successful! Your order is being processed.'}), 200
+    return jsonify({'message': 'Order confirmed. We will have it ready for collection.', 'order_id': cursor.lastrowid}), 201
 
 # Serve static files from the root directory
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
 
+ALLOWED_EXTENSIONS = {'.html', '.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf'}
+
 @app.route('/<path:path>')
 def serve_static(path):
+    ext = os.path.splitext(path)[1].lower()
+    if not ext or ext not in ALLOWED_EXTENSIONS:
+        return send_from_directory('.', '404.html'), 404
+        
     if os.path.exists(path):
         return send_from_directory('.', path)
-    return "Not Found", 404
+    return send_from_directory('.', '404.html'), 404
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return send_from_directory('.', '404.html'), 404
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    from waitress import serve
+    serve(app, host='0.0.0.0', port=5000)
