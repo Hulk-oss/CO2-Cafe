@@ -246,6 +246,10 @@ def checkout(current_user):
     conn.close()
     return jsonify({'message': 'Order confirmed. We will have it ready for collection.', 'order_id': cursor.lastrowid}), 201
 
+@app.route('/api/<path:path>', methods=['OPTIONS'])
+def api_options(path):
+    return jsonify({}), 200
+
 # Serve static files from the root directory
 @app.route('/')
 def index():
@@ -269,10 +273,13 @@ def page_not_found(e):
 
 @app.after_request
 def add_security_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    response.headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';"
+    response.headers['Content-Security-Policy'] = "default-src 'self' *; style-src 'self' 'unsafe-inline' https://*; font-src 'self' https://*; script-src 'self' 'unsafe-inline' https://*; connect-src 'self' http://localhost:5000 http://127.0.0.1:5000 https://*;"
     return response
 
 if __name__ == '__main__':
