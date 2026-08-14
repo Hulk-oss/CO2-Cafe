@@ -29,7 +29,7 @@ const pageName = location.pathname.split('/').pop() || 'index.html';
 document.querySelectorAll('.nav a').forEach(link => { if (link.getAttribute('href') === pageName) link.setAttribute('aria-current', 'page'); });
 setTimeout(() => document.querySelectorAll('.nav a').forEach(link => { if (link.getAttribute('href') === pageName) link.setAttribute('aria-current', 'page'); }), 0);
 const revealTargets = document.querySelectorAll('.section, .craft, .experience, .guest-notes, .club, .cta-band, .journal-card, .gift-panel');
-if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) { const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }), { threshold: .12 }); revealTargets.forEach(target => { target.classList.add('reveal'); observer.observe(target); }); }
+if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) { const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }), { threshold: 0.12 }); revealTargets.forEach(target => { target.classList.add('reveal'); observer.observe(target); }); }
 const navToggle = document.querySelector('.nav-toggle'); const nav = document.querySelector('.nav');
 if (navToggle && nav) { [['experiences.html', 'Experiences'], ['journal.html', 'Journal'], ['gifts.html', 'Gifts']].forEach(([href, label]) => { if (!nav.querySelector(`[href="${href}"]`)) nav.insertAdjacentHTML('beforeend', `<a href="${href}">${label}</a>`); }); nav.querySelector('[href="login.html"]')?.remove(); const isLoggedIn = !!localStorage.getItem('boojee_token'); const orderButton = document.querySelector('.header .order-button'); if (orderButton && !document.querySelector('.header .account-button')) orderButton.insertAdjacentHTML('beforebegin', `<a class="account-button" href="${isLoggedIn ? 'profile.html' : 'login.html'}">${isLoggedIn ? 'Profile' : 'Log in'}</a>`); if (isLoggedIn && !nav.querySelector('[href="profile.html"]')) nav.insertAdjacentHTML('beforeend', '<a href="profile.html">Profile</a>'); navToggle.addEventListener('click', () => { const open = nav.classList.toggle('open'); navToggle.setAttribute('aria-expanded', String(open)); navToggle.textContent = open ? 'Close' : 'Menu'; }); nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { nav.classList.remove('open'); navToggle.setAttribute('aria-expanded', 'false'); navToggle.textContent = 'Menu'; })); }
 const toast = document.querySelector('#toast'); let timer; const notify = message => { if (!toast) return; toast.textContent = message; toast.classList.add('show'); clearTimeout(timer); timer = setTimeout(() => toast.classList.remove('show'), 2600); };
@@ -43,7 +43,7 @@ window.saveCart = () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ cart: Object.fromEntries(cart) })
-        }).catch(err => console.error(err));
+        }).catch(err => window.console.error(err));
     }
 };
 window.syncCartFromBackend = async () => {
@@ -60,9 +60,9 @@ window.syncCartFromBackend = async () => {
                 if (typeof renderCart === 'function') renderCart();
             }
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { window.console.error(e); }
 };
-syncCartFromBackend();
+window.syncCartFromBackend();
 const count = document.querySelector('#cartCount'); const prices = {'Velvet Hot Chocolate':120,'Garden Strawberry Tart':150,'Dark Chocolate Cookie':100};
 document.body.insertAdjacentHTML('beforeend', '<div class="desk-backdrop"></div><aside class="order-desk" aria-label="Your order"><div class="desk-head"><div><p class="kicker">CLICK & COLLECT</p><h2>Your order</h2></div><button class="desk-close" type="button">Close</button></div><div class="desk-items"><p class="desk-empty">Your order is waiting for something delicious.</p></div><div class="collection"><label for="collectionTime">⏳ Collection time</label><select id="collectionTime"></select></div><div class="desk-total"><span>Total</span><strong>£0.00</strong></div><button class="button dark desk-checkout" type="button">Continue to secure checkout</button><p class="checkout-note">A secure payment flow can be connected here.</p></aside>');
 const updateCollectionTimes = () => {
@@ -90,7 +90,7 @@ const desk = document.querySelector('.order-desk'), backdrop = document.querySel
 const openDesk = () => { desk.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow = 'hidden'; };
 const closeDesk = () => { desk.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow = ''; };
 document.querySelectorAll('.order-button,[data-order]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); openDesk(); })); document.querySelector('.desk-close').addEventListener('click', closeDesk); backdrop.addEventListener('click', closeDesk);
-function renderCart(){ let quantity=0,total=0; deskItems.replaceChildren(); if(!cart.size){deskItems.innerHTML='<p class="desk-empty">Your order is waiting for something delicious.</p>';} cart.forEach((item,name)=>{quantity+=item.quantity;total+=item.price*item.quantity;const row=document.createElement('article');row.className='desk-item';row.innerHTML=`<strong>${escapeHTML(name)}</strong><span>${escapeHTML(item.quantity)} × ${formatINR(item.price)}</span><button type="button" aria-label="Remove ${escapeHTML(name)}">Remove</button>`;row.querySelector('button').addEventListener('click',()=>{cart.delete(name);renderCart();});deskItems.append(row);}); if(count) count.textContent=quantity; deskTotal.textContent=formatINR(total); saveCart(); }
+function renderCart(){ let quantity=0,total=0; deskItems.replaceChildren(); if(!cart.size){deskItems.innerHTML='<p class="desk-empty">Your order is waiting for something delicious.</p>';} cart.forEach((item,name)=>{quantity+=item.quantity;total+=item.price*item.quantity;const row=document.createElement('article');row.className='desk-item';row.innerHTML=`<strong>${window.escapeHTML(name)}</strong><span>${window.escapeHTML(item.quantity)} × ${formatINR(item.price)}</span><button type="button" aria-label="Remove ${window.escapeHTML(name)}">Remove</button>`;row.querySelector('button').addEventListener('click',()=>{cart.delete(name);renderCart();});deskItems.append(row);}); if(count) count.textContent=quantity; deskTotal.textContent=formatINR(total); window.saveCart(); }
 renderCart();
 document.querySelectorAll('[data-add]').forEach(button => button.addEventListener('click', () => { const name=button.dataset.add, product=cart.get(name)||{price:Number(button.dataset.price)||prices[name]||0,quantity:0}; product.quantity+=1;cart.set(name,product);renderCart();notify(`${name} added to your order.`); }));
 document.querySelector('.desk-checkout').addEventListener('click', async () => {
