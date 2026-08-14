@@ -1,3 +1,13 @@
+const originalFetch = window.fetch;
+window.fetch = function() {
+    let [resource, config] = arguments;
+    if (typeof resource === 'string' && resource.startsWith('/api/')) {
+        if (location.protocol === 'file:' || (location.hostname.match(/localhost|127\.0\.0\.1/) && location.port !== '5000')) {
+            resource = 'http://127.0.0.1:5000' + resource;
+        }
+    }
+    return originalFetch(resource, config);
+};
 ['css/enhancements.css', 'css/premium.css', 'css/commerce.css', 'css/discover.css', 'css/catalog.css', 'css/journal-gifts.css', 'css/bell-notify.css'].forEach(href => { const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = href; document.head.append(link); });
 const formatCurrency = value => `₹${Math.round(Number(value) * 25 / 10) * 10}`;
 const formatINR = value => `₹${Number(value).toLocaleString('en-IN')}`;
@@ -21,7 +31,7 @@ setTimeout(() => document.querySelectorAll('.nav a').forEach(link => { if (link.
 const revealTargets = document.querySelectorAll('.section, .craft, .experience, .guest-notes, .club, .cta-band, .journal-card, .gift-panel');
 if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) { const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } }), { threshold: .12 }); revealTargets.forEach(target => { target.classList.add('reveal'); observer.observe(target); }); }
 const navToggle = document.querySelector('.nav-toggle'); const nav = document.querySelector('.nav');
-if (navToggle && nav) { [['experiences.html', 'Experiences'], ['journal.html', 'Journal'], ['gifts.html', 'Gifts']].forEach(([href, label]) => { if (!nav.querySelector(`[href="${href}"]`)) nav.insertAdjacentHTML('beforeend', `<a href="${href}">${label}</a>`); }); nav.querySelector('[href="login.html"]')?.remove(); const orderButton = document.querySelector('.header .order-button'); if (orderButton && !document.querySelector('.header .account-button')) orderButton.insertAdjacentHTML('beforebegin', '<a class="account-button" href="login.html">Account</a>'); navToggle.addEventListener('click', () => { const open = nav.classList.toggle('open'); navToggle.setAttribute('aria-expanded', String(open)); navToggle.textContent = open ? 'Close' : 'Menu'; }); nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { nav.classList.remove('open'); navToggle.setAttribute('aria-expanded', 'false'); navToggle.textContent = 'Menu'; })); }
+if (navToggle && nav) { [['experiences.html', 'Experiences'], ['journal.html', 'Journal'], ['gifts.html', 'Gifts']].forEach(([href, label]) => { if (!nav.querySelector(`[href="${href}"]`)) nav.insertAdjacentHTML('beforeend', `<a href="${href}">${label}</a>`); }); nav.querySelector('[href="login.html"]')?.remove(); const orderButton = document.querySelector('.header .order-button'); if (orderButton && !document.querySelector('.header .account-button')) orderButton.insertAdjacentHTML('beforebegin', `<a class="account-button" href="${localStorage.getItem('boojee_token') ? 'profile.html' : 'login.html'}">Account</a>`); navToggle.addEventListener('click', () => { const open = nav.classList.toggle('open'); navToggle.setAttribute('aria-expanded', String(open)); navToggle.textContent = open ? 'Close' : 'Menu'; }); nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { nav.classList.remove('open'); navToggle.setAttribute('aria-expanded', 'false'); navToggle.textContent = 'Menu'; })); }
 const toast = document.querySelector('#toast'); let timer; const notify = message => { if (!toast) return; toast.textContent = message; toast.classList.add('show'); clearTimeout(timer); timer = setTimeout(() => toast.classList.remove('show'), 2600); };
 const savedCart = localStorage.getItem('boojee-cart');
 const cart = new Map(savedCart ? JSON.parse(savedCart) : []);
@@ -96,6 +106,15 @@ document.querySelector('#enquiryForm')?.addEventListener('submit', event => { ev
   const bell = document.querySelector('[data-bell-toggle]');
   const button = document.querySelector('[data-bell-button]');
   if (!bell || !button) return;
+  
+  const style = document.createElement('style');
+  style.textContent = '[data-bell-button]:focus, [data-bell-toggle]:focus { outline: none !important; -webkit-tap-highlight-color: transparent; }';
+  document.head.append(style);
+
+  if (localStorage.getItem('boojee-bell') === 'on') {
+    bell.classList.remove('off');
+  }
+
   const syncBell = () => {
     const enabled = !bell.classList.contains('off');
     bell.setAttribute('aria-pressed', String(enabled));
@@ -105,10 +124,11 @@ document.querySelector('#enquiryForm')?.addEventListener('submit', event => { ev
   };
   const toggleBell = () => {
     bell.classList.toggle('off');
+    localStorage.setItem('boojee-bell', bell.classList.contains('off') ? 'off' : 'on');
     syncBell();
     notify(bell.classList.contains('off') ? 'Cafe alerts are off.' : 'Cafe alerts are on for fresh drops.');
   };
-  bell.addEventListener('click', toggleBell);
+  
   button.addEventListener('click', toggleBell);
   syncBell();
 })();
