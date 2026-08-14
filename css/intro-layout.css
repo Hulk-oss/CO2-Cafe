@@ -36,3 +36,33 @@
   0% { opacity: 0.6; }
   100% { opacity: 1; }
 }
+
+.intro-continue-btn {
+  position: absolute;
+  bottom: 10%;
+  opacity: 0;
+  pointer-events: none;
+  background: #f84356;
+  color: #fff;
+  padding: 12px 32px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  border: 2px solid #000;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: opacity 0.5s ease-in-out, transform 0.1s;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.intro-continue-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.intro-continue-btn.visible:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}

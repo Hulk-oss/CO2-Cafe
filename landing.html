@@ -150,6 +150,7 @@ svg, .dust {
 <div id="intro-screen">
   <div class="guybrush"></div>
   <div class="intro-text">Scouting for a good energy and coffee</div>
+  <button id="intro-continue-btn" class="intro-continue-btn">Continue</button>
 </div>
 
 <a href="index.html" class="enter-btn">Skip to Boojee Cafe</a>
@@ -442,16 +443,24 @@ window.onload = ()=> {
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const introScreen = document.getElementById('intro-screen');
+    const continueBtn = document.getElementById('intro-continue-btn');
+    
     if (!sessionStorage.getItem('introPlayed')) {
       setTimeout(() => {
-        if (introScreen) {
+        if (continueBtn) {
+          continueBtn.classList.add('visible');
+        }
+      }, 7000);
+
+      if (continueBtn && introScreen) {
+        continueBtn.addEventListener('click', () => {
           introScreen.classList.add('fade-out');
           setTimeout(() => {
             introScreen.remove();
           }, 800);
-        }
-        sessionStorage.setItem('introPlayed', 'true');
-      }, 7000);
+          sessionStorage.setItem('introPlayed', 'true');
+        });
+      }
     } else {
       if (introScreen) introScreen.remove();
     }
