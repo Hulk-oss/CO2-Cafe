@@ -28,7 +28,7 @@
   width:80em;
   height:80em;
   opacity:1;
-  cursor:pointer;
+  pointer-events:none;
   transform-origin:50% -50vh;
   animation:5s ease-in-out infinite cafe-bell;
   border:0;
