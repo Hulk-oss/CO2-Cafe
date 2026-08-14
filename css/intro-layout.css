@@ -6,6 +6,7 @@
   height: 100vh;
   background-color: #e8dfd2; /* cream */
   z-index: 9999;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
